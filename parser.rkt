@@ -3,7 +3,6 @@
 ; parser file
 
 ; imports
-(require "runner.rkt" "CSC470-HW11-Code")
 
 ;neo parser
 (define neo-parser

@@ -3,7 +3,9 @@
 ; main execution code file
 
 ; imports
-(require "parser.rkt" "runner.rkt" "utility.rkt")
+(require "parser.rkt")
+(require "runner.rkt")
+(require "utility.rkt")
 
 
 
