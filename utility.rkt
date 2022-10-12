@@ -1,5 +1,5 @@
 #lang racket
-; CSC470-HW11-Code - William Bushie
+; CSC470 - HW 11 - William Bushie
 ; utilty file (useful tools)
 
 
@@ -47,6 +47,31 @@
       ((equal? op '&&) (and num1 num2))
       ((equal? op '||) (or num1 num2))
       (else (not num1)) )))
+
+;tool to find element at specified index
+(define elementAt
+  (lambda (lst index)
+    (cond ((not (list? lst)) "This is not a list")
+          ((null? lst) "This list is empty or index out of bounds")
+          ((equal? index 0) (car lst))
+          (else (elementAt (cdr lst) (- index 1))) )))
+
+;(define env (a 1) (b 2) (c 3) (d 4)) -> (a b c d) + (1 2 3 4)
+; get variable names from ((a 1) (b 2)) input
+(define getVarnames
+  (lambda (lst)
+    (if (null? lst) '()
+        (cons (car (car lst)) (getVarnames (cdr lst))) )))
+
+; get values from ((a 1) (b 2)) input
+(define getValues
+  (lambda (lst)
+    (if (null? lst) '()
+        (cons (car (cdr (car lst))) (getValues (cdr lst))) )))
+
+
+
+
 
 ; provide all methods for outside use
 (provide (all-defined-out))
