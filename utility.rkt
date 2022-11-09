@@ -1,4 +1,6 @@
 #lang racket
+; CSC470-HW14-Code - William Bushie
+; utility file (helpful tools)
 
 ; obtain element given index
 (define elementAt

@@ -1,4 +1,6 @@
 #lang racket
+; CSC470-HW14-Code - William Bushie
+; runner file
 
 ; imports 
 (require "utility.rkt")
@@ -123,22 +125,50 @@
 
     
 ; run let parsed code
+;(define run-let-exp
+;  (lambda (parsed-code env)
+;    ;((a (num-exp 7)) (b (var-exp a)) (x (var-exp b))) > ((a 7) (b 7) (x 7))
+;    ;(a (num-exp 7)) -> (a 7) < (list (car code) (run-neo-parsed-code (cadr code) env))) 
+;    (let* ((resolved-var-list (cascade-update-env (elementAt parsed-code 1) env))
+;           (list-of-names (getVarnames (elementAt parsed-code 1)))
+;           ;list-of-values = ((num-exp 7) (var-exp a) (var-exp b))
+;           ;body = (math + (var-exp x) (var-exp a))
+;          (list-of-values (getValues resolved-var-list))
+;          (new_env (extend_local_scope list-of-names list-of-values env))
+;          ;new variables will be added to the local scope
+;          (body (elementAt parsed-code 2)))
+;      ;(run-neo-parsed-code body new_env) )))
+;      (display list-of-values) )))
+
+
+; run let parsed code
 (define run-let-exp
   (lambda (parsed-code env)
-    ;((a (num-exp 7)) (b (var-exp a)) (x (var-exp b))) > ((a 7) (b 7) (x 7))
-    ;(a (num-exp 7)) -> (a 7) < (list (car code) (run-neo-parsed-code (cadr code) env))) 
-    (let* ((resolved-var-list (cascade-update-env (elementAt parsed-code 1) env))
+    (let* ((resolved-var-list
+            (map (lambda (pair) (list (car pair) (run-neo-parsed-code (cadr pair) env))) (elementAt parsed-code 1)))
            (list-of-names (getVarnames (elementAt parsed-code 1)))
-           ;list-of-values = ((num-exp 7) (var-exp a) (var-exp b))
-           ;body = (math + (var-exp x) (var-exp a))
           (list-of-values (getValues resolved-var-list))
           (new_env (extend_local_scope list-of-names list-of-values env))
-          ;new variables will be added to the local scope
           (body (elementAt parsed-code 2)))
-      ;(run-neo-parsed-code body new_env)
-      (display list-of-values) )))
+      (run-neo-parsed-code body new_env) )))
 
 ; update scope
+;(define cascade-update-env
+;  (lambda (parsed-scope env)
+;    (cond
+;      ((null? parsed-scope) env)
+;      (let* ((original-local-scope (if (equal? (car (car env) 'global)) '() (car env)))
+;           (curr-local-scope (extend_local_scope
+;                              (list (car (car parsed-code)))
+;                              (list (cadr (car parsed-code)))
+;                              local-scope
+;                             ))
+;                 (pop_off_env (pop_env_to_global_scope env)))
+;        (cascade-update-env (cdr parsed-scope)
+;                            ((cons new_scope pop_off_env))))
+;)))
+          
+
 (define cascade-update-env
   (lambda (parsed-scope env)
     (if (null? parsed-scope) env
@@ -147,6 +177,29 @@
                (var_value (run-neo-parsed-code (cadr (car parsed-scope)) env))
                (pop_off_env (pop_env_to_global_scope env))
                (new_env (list (cons (list varname var_value) original-local-scope) (pop_off_env)))) (cascade-update-env (cdr parsed-scope) new_env)) )))
+          
+
+; update scope
+;(define cascade-update-env
+;  (lambda (parsed-scope env)
+;    (if (null? parsed-scope) env
+;        (let* ((original-local-scope (if (equal? (car (car env)) 'global) '() (car env)))
+;               (varname (caar parsed-scope))
+;              (var_value (run-neo-parsed-code (cadr (car parsed-scope)) env))
+;              (pop_off_env (pop_env_to_global_scope env))
+;              (new_env (list (cons (list varname var_value) original-local-scope) (pop_off_env)))) (cascade-update-env (cdr parsed-scope) new_env))) ))
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ; provide all functions out
