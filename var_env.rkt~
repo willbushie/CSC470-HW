@@ -1,8 +1,0 @@
-#lang racket
-; 2022-10-11_CSC470-ClassCode
-; var_env file
-
-
-
-; provide all methods for outside use
-(provide (all-defined-out))

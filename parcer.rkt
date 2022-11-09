@@ -1,11 +1,9 @@
 #lang racket
-; 2022-10-11_CSC470-ClassCode
-; parser file
 
 ; imports
 (require "utility.rkt")
 
-; neo-parser
+; main parser
 (define neo-parser
   (lambda (neo-code)
     (cond
@@ -24,48 +22,59 @@
       ((equal? (car neo-code) 'call) (neo-call-code-parser neo-code))
       ((equal? (car neo-code) 'local-vars) (neo-let-code-parser neo-code))
       ;((neo-parser 1) (neo-parser 'a) (neo-parser (math + 1 2)))
-      (else (map neo-parser neo-code)) )))
+      (else (map neo-parser neo-code))))) 
 
-; parser only for boolean expressions
+; parser for bool-exp
 (define neo-bool-code-parser
   (lambda (neo-code)
      (if (equal? (length neo-code) 3)
             (list 'bool-exp (elementAt neo-code 1) (neo-parser (caddr neo-code)) '())
-        (cons 'bool-exp (cons (cadr neo-code) (map neo-parser (cddr neo-code))))) ))
+        (cons 'bool-exp (cons (cadr neo-code) (map neo-parser (cddr neo-code)))))))
 
-; parser only for math expressions
+; parser for math-exp
 (define neo-math-code-parser
   (lambda (neo-code)
     (list 'math-exp (cadr neo-code)
              (neo-parser (caddr neo-code))
-             (neo-parser (cadddr neo-code))) ))
+             (neo-parser (cadddr neo-code)))))
 
-; parser for only function expressions
+; parser for func-exp
 (define neo-function-code-parser
   (lambda (neo-code)
     (list 'func-exp
              (list 'params (cadr neo-code))
-             (list 'body-exp (neo-parser (caddr neo-code)))) ))
+             (list 'body-exp (neo-parser (caddr neo-code))))))
 
-; parser for only ask expressions
+; parser for ask-exp
 (define neo-ask-code-parser
   (lambda (neo-code)
     (cons 'ask-exp
-             (map neo-parser (cdr neo-code))) ))
+             (map neo-parser (cdr neo-code)))))
 
-; parser for only call expressions
+; parser for call-exp
 (define neo-call-code-parser
   (lambda(neo-code)
     (list 'app-exp
              (neo-parser (cadr neo-code))
-             (neo-parser (caddr neo-code))) ))
+             (neo-parser (caddr neo-code)))))
 
-;(local-var ((a 1) (b 2) (c 3)) (neo-exp)) = neo-code
+;(local-vars ((a 1) (b 2) (c a)) (neo-exp)) = neo-code
 ;(let-exp ((a 1) (b 2) (c 3)) (parsed-neo-exp))
+;(let-exp ((a (num-exp 1)) (b (num-exp 2)) (c (var-exp a))) (parsed-neo-code))
+;1 -> (num-exp 1) = code -> (neo-parser code)
+;(a 1) -> (a (num-exp 1)) -> code == (a 1) < (list (car code) (neo-parser (cadr code)))
+;((a 1) (b 2) (c a)) -> ((a (num-exp 1)) (b (num-exp 2)) (c (var-exp a)))
+;((map (lambda (pair) (list (car pair) (neo-parser (cadr pair))) lst)
+
+; parser for let-exp
 (define neo-let-code-parser
   (lambda (neo-code)
-    (list 'let-exp (elementAt neo-code 1) (neo-parser (elementAt neo-code 2))) ))
+    (list 'let-exp
+          (map (lambda (pair) (list (car pair) (neo-parser (elementAt pair 1))))
+               (elementAt neo-code 1))
+           (neo-parser (elementAt neo-code 2)))))
 
-  
-; provide all methods for outside use
+
+
+; provide all functions out
 (provide (all-defined-out))

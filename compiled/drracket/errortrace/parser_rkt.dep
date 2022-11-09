@@ -1,1 +1,0 @@
-("8.6" ta6osx ("fa1d70132b8277299da62c39859fe3a7c8ddec32" . "c2738036f2f6c609632b77bf7a72bc12939dbf5a") #"/Users/williambushie/1.MyFolders/1. College/1.Fall2022/CSC470/CSC470-HW13-Code/utility.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))

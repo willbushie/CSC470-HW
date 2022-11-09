@@ -1,32 +1,40 @@
 #lang racket
-; CSC470-HW13-Code - William Bushie
-; main execution code file
-
-; imports
-(require "parser.rkt")
-(require "runner.rkt")
 (require "utility.rkt")
-(require "var_env.rkt")
+(require "runner.rkt")
+(require "parcer.rkt")
+(require "variable_env.rkt")
 
+;public static void main(){
+;    int a = 1;
+;    int b = 2;
+;    int c = 5;
 
+;    func1(a);
 
+;    func2(a); //return 0.01
 
-;(define env '((a 1) (b 2) (c 5)))
-;(app-exp (func-exp (params (identifier1, identifier2, identifer3 ...)) (body-exp)) ((neo-exp1 neo-exp2 neo-exp3 ...))
-;(define sample-code '(call (function () (ask (bool > a b) (math - a b) (math + a b))) (a)))
-;(display (neo-parser sample-code))
-;(define parsed-neo-code (neo-parser sample-code))
-;(run-neo-parsed-code parsed-neo-code env)
+;    func_alex(a, 100); //return 0.01
+;}
 
-(define env '((a 1) (b 2) (c 5)))
+;function func1(int r){//r = a, and r = 1
+;    return r;//return 1;
+;}
 
-;(local-var ((a 1) (b 2) (c 3)) (neo-exp))
-;(neo-let-code-parser '(local-var ((a 1) (b 2) (c 3)) (math + a b)))
-;(neo-parser '(local-vars ((a 1) (b 2) (c 3)) (math + a b)))
+;function func2(int r){//convert a number into percentage ratio
+;    int p = 100;
+;    int r = 5;
+;    return r / p;
+;}
 
-;(call (function (a) (local-vars ((x 5) (y 6) (z 9)) ((call (function (b)(math + a (math * b x)))) (2)))) (3))
+;function func_alex(int r, int p){
+;    return r / p;
+;}
 
+(define env '((global (a 1) (b 2) (c 5))))
 
-(define parsed-neo-code (neo-parser '(call (function (x) (local-vars ((a 3) (b 7) (c 3)) (math + a b))) (5))))
+;(define sample-code '(call (function (r) (local-vars ((p 100)) (math / r p)) ) (a)))
+(define sample-code '(local-vars ((a 7) (b a) (x b)) (math + x a)))
+(displayln (neo-parser sample-code))
+(define parsed-neo-code (neo-parser sample-code))
 (run-neo-parsed-code parsed-neo-code env)
 
