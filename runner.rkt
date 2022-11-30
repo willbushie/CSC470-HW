@@ -152,45 +152,71 @@
           (body (elementAt parsed-code 2)))
       (run-neo-parsed-code body new_env) )))
 
-; update scope
-;(define cascade-update-env
-;  (lambda (parsed-scope env)
-;    (cond
-;      ((null? parsed-scope) env)
-;      (let* ((original-local-scope (if (equal? (car (car env) 'global)) '() (car env)))
-;           (curr-local-scope (extend_local_scope
-;                              (list (car (car parsed-code)))
-;                              (list (cadr (car parsed-code)))
-;                              local-scope
-;                             ))
-;                 (pop_off_env (pop_env_to_global_scope env)))
-;        (cascade-update-env (cdr parsed-scope)
-;                            ((cons new_scope pop_off_env))))
-;)))
+
+;(display (string-append "**screen** " (number->string a)))
+(define run-print-exp
+  (lambda (parsed-code env)
+    (displayln (string-append "**screen** " (number->string (run-neo-parsed-code parsed-code env)))) ))
+
+
+;(assign-exp x (num-exp 8))
+;add (x 8) into the local variable scope
+;it would return a new environment, but we do not want to run this expression alone
+(define run-assign-exp
+  (lambda (varname value env)
+    (cond
+      ((null? env) #false)
+      ((equal? (caar env) 'global)
+       (cons (list (list varname value)) env)); (((varname value)) (global (a 1) ...))
+      (else (let*
+          ;(((x 8) (y 9)) (global (a 1) (b 2) (c 5)) <- (z 10)
+          ;new-local-scope: ((z 10) (x 8) (y 9))
+          ((new-local-scope (update-scope varname value (car env))) (under-env (cdr env))) (cons new-local-scope under-env)) ))))
+
+
+;(block (assign x 8) (print x) (assign y 10) (assign z 12) (print (math + y z)))
+;(block-exp (assign-exp x (num-exp 8)) (print-exp (var-exp x))
+(define run-block-exp
+  (lambda (parsed-list-exp env)
+    (cond
+      ((null? parsed-list-exp) '())
+      ((equal? (caar parsed-list-exp) 'assign-exp)
+       ;parsed-list-exp: ((assign-exp x (num-exp 8)) (print-exp (var-exp a)))
+       ;varname: x <- (cadr (car parsed-list-exp))
+       ;value: 8 <- (run-neo-parsed-code (car (cddr (car parsed-list-exp))) env)
+       (run-block-exp
+        (cdr parsed-list-exp)
+        (run-assign-exp
+         (cadr (car parsed-list-exp))
+         (run-neo-parsed-code (elementAt (car parsed-list-exp) 2) env) env)))
+      (else
+       (let ((return (run-neo-parsed-code (car parsed-list-exp) env)))
+         (if (void? return) (run-block-exp (cdr parsed-list-exp) env) (cons return (run-block-exp (cdr parsed-list-exp) env)) ))))))
           
+
+;(while-exp (bool < i (num-exp 10))(block-exp (assign i (math + i 1))))
+;func1: if bool-exp (block_exp func1(i))
+(define run-while-exp
+  (lambda (bool_exp block_exp env)
+    (let* ((new_block_exp (append block_exp (list (list 'while-exp bool_exp block_exp)))))
+      (if (run-neo-parsed-code bool_exp env) (run-neo-parsed-code new_block_exp env) '()) )))
+
+
 
 (define cascade-update-env
   (lambda (parsed-scope env)
     (if (null? parsed-scope) env
-        (let* ((original-local-scope (if (equal? (car (car env)) 'global) '() (car env)))
-               (varname (caar parsed-scope))
-               (var_value (run-neo-parsed-code (cadr (car parsed-scope)) env))
-               (pop_off_env (pop_env_to_global_scope env))
-               (new_env (list (cons (list varname var_value) original-local-scope) (pop_off_env)))) (cascade-update-env (cdr parsed-scope) new_env)) )))
-          
-
-; update scope
-;(define cascade-update-env
-;  (lambda (parsed-scope env)
-;    (if (null? parsed-scope) env
-;        (let* ((original-local-scope (if (equal? (car (car env)) 'global) '() (car env)))
-;               (varname (caar parsed-scope))
-;              (var_value (run-neo-parsed-code (cadr (car parsed-scope)) env))
-;              (pop_off_env (pop_env_to_global_scope env))
-;              (new_env (list (cons (list varname var_value) original-local-scope) (pop_off_env)))) (cascade-update-env (cdr parsed-scope) new_env))) ))
-
-
-
+        (let* (;1. what is the local scope: (((a 7)) (global (a 1) (b 2) (c 5)))
+               ;1.1 there is only one global scope there, so local scope should be '()
+               ;1.2 there is a scope on top of global scope, that is the local scope
+               (local-scope (if (equal? (car (car env)) 'global) '() (car env)))
+               ;2. the global scope
+               (global-scope-env (pop_env_to_global_scope env));((global (a 1)...)
+               ;3. update the local scope
+               (first-name-value-pair (car parsed-scope));((a 7)...)
+               (new-local-scope (cons (list (car first-name-value-pair) (run-neo-parsed-code (cadr first-name-value-pair) env)) local-scope))
+               ;4. concate updated local scope on top of global scope to form the new environment
+               (new_env (cons new-local-scope global-scope-env))) (cascade-update-env (cdr parsed-scope) new_env) ))))
 
 
 
