@@ -1,5 +1,5 @@
 #lang racket
-; CSC470-HW14-Code - William Bushie
+; CSC470-HW17-Code - William Bushie
 ; utility file (helpful tools)
 
 ; obtain element given index
